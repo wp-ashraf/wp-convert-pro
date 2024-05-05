@@ -317,7 +317,7 @@ function convertpro_random_redirect()
                     $variation2 = convertpro_query($value->id)[1];
                 }
                 // Select a variation and set the cookie
-                $variation = selectVariation($wpdb, $value->id);
+                $variation = convertpro_selectVariation($wpdb, $value->id);
                 if ($variation) {
                     $cookieName = 'convert_pro_test_' . $value->id;
                     updateVariationAndRedirect($wpdb, $variation, $cookieName, $value->id);
@@ -330,7 +330,7 @@ function convertpro_random_redirect()
 add_action('template_redirect', 'convertpro_random_redirect');
 
 
-function selectVariation($wpdb, $test_id)
+function convertpro_selectVariation($wpdb, $test_id)
 {
     $variations = convertpro_query($test_id);
     $available_variations = array_filter($variations, function ($variation) {

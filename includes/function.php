@@ -25,7 +25,7 @@ if (!function_exists('convertpro_ajax_request')) {
 
         $permalink = get_permalink($pageId);
 
-        $purl = isset($_POST['previous_url']) ? $_POST['previous_url'] : '';
+        $purl = isset($_POST['previous_url']) ? esc_url($_POST['previous_url']) : '';
 
         $parsedUrl = wp_parse_url($purl);
         $path = isset($parsedUrl['path']) ? $parsedUrl['path'] : '';

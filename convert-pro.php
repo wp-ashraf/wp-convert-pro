@@ -277,50 +277,51 @@ $convertpro = ConvertPro::init();
 
 
 // Function to randomly redirect users between two pages based on identifier
-function convertpro_random_redirect()
-{
+if (!function_exists('convertpro_random_redirect')) {
 
-    // Check if the identifier exists in the URL query string
-    // $abTester = new AbTester\Classes\AbTestRepo();
-    $current_slug = trim(wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-    global $wpdb;
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-    $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}convertpro");
+    function convertpro_random_redirect()
+    {
 
-    foreach ($results as $value) {
+        $current_slug = sanitize_text_field(trim(wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+        $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}convertpro");
 
-        if ($current_slug === $value->test_uri) {
-            $page_slugs = array_map(function ($result) {
-                return $result->page_slug;
-            }, convertpro_query($value->id));
+        foreach ($results as $value) {
 
-            if (isset($_COOKIE['convert_pro_test_' . $value->id]) && in_array($_COOKIE['convert_pro_test_' . $value->id], $page_slugs)) {
-                // Redirect if the cookie is set and its value matches a page slug
-                wp_redirect(home_url('/') . $_COOKIE['convert_pro_test_' . $value->id]);
-                exit;
-            } else {
-                $variation1 = convertpro_query($value->id)[0];
-                $variation2 = convertpro_query($value->id)[1];
+            if ($current_slug === $value->test_uri) {
+                $page_slugs = array_map(function ($result) {
+                    return $result->page_slug;
+                }, convertpro_query($value->id));
 
-                if ($variation1->remaining == 0 && $variation2->remaining == 0) {
-                    // Calculate remaining count based on the percentage
-                    $remaining1 = str_split($variation1->percentage)[0]; // Assuming the percentage is in the format 'XX%'
-                    $remaining2 = str_split($variation2->percentage)[0]; // Assuming the percentage is in the format 'XX%'
-
-                    // Update the remaining count of variations
-                    updateVariationRemaining($wpdb, $variation1->id, $remaining1);
-                    updateVariationRemaining($wpdb, $variation2->id, $remaining2);
-
-                    // Retrieve the updated variations
+                if (isset($_COOKIE['convert_pro_test_' . $value->id]) && in_array($_COOKIE['convert_pro_test_' . $value->id], $page_slugs)) {
+                    // Redirect if the cookie is set and its value matches a page slug
+                    wp_redirect(esc_url(home_url('/')) . $_COOKIE['convert_pro_test_' . $value->id]);
+                    exit;
+                } else {
                     $variation1 = convertpro_query($value->id)[0];
                     $variation2 = convertpro_query($value->id)[1];
-                }
-                // Select a variation and set the cookie
-                $variation = convertpro_selectVariation($wpdb, $value->id);
-                if ($variation) {
-                    $cookieName = 'convert_pro_test_' . $value->id;
-                    updateVariationAndRedirect($wpdb, $variation, $cookieName, $value->id);
+
+                    if ($variation1->remaining == 0 && $variation2->remaining == 0) {
+                        // Calculate remaining count based on the percentage
+                        $remaining1 = str_split($variation1->percentage)[0]; // Assuming the percentage is in the format 'XX%'
+                        $remaining2 = str_split($variation2->percentage)[0]; // Assuming the percentage is in the format 'XX%'
+
+                        // Update the remaining count of variations
+                        convertpro_updateVariationRemaining($wpdb, $variation1->id, $remaining1);
+                        convertpro_updateVariationRemaining($wpdb, $variation2->id, $remaining2);
+
+                        // Retrieve the updated variations
+                        $variation1 = convertpro_query($value->id)[0];
+                        $variation2 = convertpro_query($value->id)[1];
+                    }
+                    // Select a variation and set the cookie
+                    $variation = convertpro_selectVariation($wpdb, $value->id);
+                    if ($variation) {
+                        $cookieName = 'convert_pro_test_' . $value->id;
+                        convertpro_updateVariationAndRedirect($wpdb, $variation, $cookieName, $value->id);
+                    }
                 }
             }
         }
@@ -329,136 +330,146 @@ function convertpro_random_redirect()
 // Hook the function to a WordPress action or filter
 add_action('template_redirect', 'convertpro_random_redirect');
 
+if (!function_exists('convertpro_selectVariation')) {
 
-function convertpro_selectVariation($wpdb, $test_id)
-{
-    $variations = convertpro_query($test_id);
-    $available_variations = array_filter($variations, function ($variation) {
-        return $variation->remaining > 0;
-    });
+    function convertpro_selectVariation($wpdb, $test_id)
+    {
+        $variations = convertpro_query($test_id);
+        $available_variations = array_filter($variations, function ($variation) {
+            return $variation->remaining > 0;
+        });
 
-    if (!empty($available_variations)) {
-        // Choose a random variation from the available ones
-        $variation = $available_variations[array_rand($available_variations)];
-        return $variation;
+        if (!empty($available_variations)) {
+            // Choose a random variation from the available ones
+            $variation = $available_variations[array_rand($available_variations)];
+            return $variation;
+        }
+
+        return null;
     }
-
-    return null;
 }
 
-function convertpro_query($id)
-{
-    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-    global $wpdb;
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-    $results = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT v.*, p.post_name AS page_slug
+if (!function_exists('convertpro_query')) {
+
+    function convertpro_query($id)
+    {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT v.*, p.post_name AS page_slug
             FROM " . $wpdb->prefix . "convertpro_variations v
             LEFT JOIN " . $wpdb->prefix . "posts p ON v.page_id = p.ID
             WHERE v.splittest_id = %d",
-            $id
-        )
-    );
-    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
-    return $results;
-}
-
-function updateVariationAndRedirect($wpdb, $variation, $cookieName, $testid)
-{
-    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-    $remaining = $variation->remaining - 1;
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-    $wpdb->update(
-        $wpdb->prefix . 'convertpro_variations',
-        array('remaining' => $remaining),
-        array('id' => $variation->id)
-    );
-    $cookie_value = convertpro_generateuid();
-
-    setcookie($cookieName, $variation->page_slug, time() + (86400 * 30), '/');
-    setcookie('convert_pro_test_id', $testid, time() + (86400 * 30), '/');
-    setcookie('convert_pro_variation_id', $variation->id, time() + (86400 * 30), '/');
-    setcookie('convert_pro_uid', $cookie_value, time() + 3600, "/");
-    $_COOKIE['convert_pro_uid'] = $cookie_value;
-    // store cookie value
-    store_visit_data($_COOKIE['convert_pro_uid'], $variation->id, $testid);
-
-    wp_redirect(get_permalink($variation->page_id));
-    exit();
-}
-
-
-
-function updateVariationRemaining($wpdb, $variationId, $remainingPercentage)
-{
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-    $wpdb->query(
-        $wpdb->prepare(
-            "UPDATE {$wpdb->prefix}convertpro_variations
-            SET remaining = %d
-            WHERE id = %d",
-            $remainingPercentage,
-            $variationId
-        )
-    );
-    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
-}
-
-// Function to generate UUID
-function convertpro_generateuid()
-{
-    return sprintf(
-        '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-
-        // 32 bits for "time_low"
-        wp_rand(0, 0xffff),
-        wp_rand(0, 0xffff),
-
-        // 16 bits for "time_mid"
-        wp_rand(0, 0xffff),
-
-        // 16 bits for "time_hi_and_version",
-        // four most significant bits holds version number 4
-        wp_rand(0, 0x0fff) | 0x4000,
-
-        // 16 bits, 8 bits for "clk_seq_hi_res",
-        // 8 bits for "clk_seq_low",
-        // two most significant bits holds zero and one for variant DCE1.1
-        wp_rand(0, 0x3fff) | 0x8000,
-
-        // 48 bits for "node"
-        wp_rand(0, 0xffff),
-        wp_rand(0, 0xffff),
-        wp_rand(0, 0xffff)
-    );
-}
-
-function store_visit_data($cookie_value, $variation, $testid)
-{
-    //  phpcs:ignore WordPress.DB.DirectDatabaseQuery
-    global $wpdb;
-    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-    $query = $wpdb->get_results($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}convertpro_interactions
-     WHERE splittest_id = %d
-     AND client_id = %s",
-        $testid,
-        $cookie_value
-    ), OBJECT);
-
-    if (sizeof($query) == 0) {
-        $table_name = $wpdb->prefix . 'convertpro_interactions';
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-        $wpdb->insert(
-            $table_name,
-            array(
-                'client_id' => $cookie_value,
-                'splittest_id' => $testid,
-                'variation_id' => $variation,
+                $id
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        return $results;
+    }
+}
+
+if (!function_exists('convertpro_updateVariationAndRedirect')) {
+    function convertpro_updateVariationAndRedirect($wpdb, $variation, $cookieName, $testid)
+    {
         // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $remaining = $variation->remaining - 1;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->update(
+            $wpdb->prefix . 'convertpro_variations',
+            array('remaining' => $remaining),
+            array('id' => $variation->id)
+        );
+        $cookie_value = convertpro_generateuid();
+
+        setcookie($cookieName, $variation->page_slug, time() + (86400 * 30), '/');
+        setcookie('convert_pro_test_id', $testid, time() + (86400 * 30), '/');
+        setcookie('convert_pro_variation_id', $variation->id, time() + (86400 * 30), '/');
+        setcookie('convert_pro_uid', $cookie_value, time() + 3600, "/");
+        $_COOKIE['convert_pro_uid'] = $cookie_value;
+        // store cookie value
+        convertpro_store_visit_data($_COOKIE['convert_pro_uid'], $variation->id, $testid);
+
+        wp_redirect(get_permalink($variation->page_id));
+        exit();
+    }
+}
+
+if (!function_exists('convertpro_updateVariationRemaining')) {
+    function convertpro_updateVariationRemaining($wpdb, $variationId, $remainingPercentage)
+    {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$wpdb->prefix}convertpro_variations
+            SET remaining = %d
+            WHERE id = %d",
+                $remainingPercentage,
+                $variationId
+            )
+        );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+    }
+}
+// Function to generate UUID
+if (!function_exists('convertpro_generateuid')) {
+    function convertpro_generateuid()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+
+            // 32 bits for "time_low"
+            wp_rand(0, 0xffff),
+            wp_rand(0, 0xffff),
+
+            // 16 bits for "time_mid"
+            wp_rand(0, 0xffff),
+
+            // 16 bits for "time_hi_and_version",
+            // four most significant bits holds version number 4
+            wp_rand(0, 0x0fff) | 0x4000,
+
+            // 16 bits, 8 bits for "clk_seq_hi_res",
+            // 8 bits for "clk_seq_low",
+            // two most significant bits holds zero and one for variant DCE1.1
+            wp_rand(0, 0x3fff) | 0x8000,
+
+            // 48 bits for "node"
+            wp_rand(0, 0xffff),
+            wp_rand(0, 0xffff),
+            wp_rand(0, 0xffff)
+        );
+    }
+}
+
+if (!function_exists('convertpro_store_visit_data')) {
+    function convertpro_store_visit_data($cookie_value, $variation, $testid)
+    {
+        //  phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        global $wpdb;
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+        $query = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}convertpro_interactions
+     WHERE splittest_id = %d
+     AND client_id = %s",
+            $testid,
+            $cookie_value
+        ), OBJECT);
+
+        if (sizeof($query) == 0) {
+            $table_name = $wpdb->prefix . 'convertpro_interactions';
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $wpdb->insert(
+                $table_name,
+                array(
+                    'client_id' => $cookie_value,
+                    'splittest_id' => $testid,
+                    'variation_id' => $variation,
+                )
+            );
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+        }
     }
 }

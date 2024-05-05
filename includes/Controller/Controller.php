@@ -65,8 +65,9 @@ class Controller
     {
         // write a code here
         // phpcs:ignore
-        $id = $_GET['id'];
-        if (!filter_var($id, FILTER_VALIDATE_INT)) {
+        $id = intval(filter_var($_GET['id'], FILTER_VALIDATE_INT));
+
+        if (!$id) {
             return "Wrong Test Id";
         }
         $repo = new ConvertProrepo();

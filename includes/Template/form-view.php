@@ -1,4 +1,7 @@
 <?php
+
+if (!defined('ABSPATH')) exit;
+
 if ($scope == "edit") {
     $formUrl = admin_url('admin.php?page=convert-pro-settings&scope=test&action=update&id=' . $test->id);
 } else {

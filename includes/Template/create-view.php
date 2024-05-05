@@ -1,4 +1,6 @@
 <?php
+if (!defined('ABSPATH')) exit;
+
 $scope = "create";
 $text = esc_html__("Create New Test", "convert-pro");
 $test = (object) [

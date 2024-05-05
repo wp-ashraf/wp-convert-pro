@@ -32,9 +32,10 @@ class ConvertProStore
         // Proceed with data storage
         $db = new Storedatabase();
         $id = $db->CreateTest();
+        $id = filter_var($id, FILTER_VALIDATE_INT);
         if (isset($_POST['test-variation']) && is_array($_POST['test-variation'])) {
             foreach ($_POST['test-variation'] as $variation) {
-                $variation['pageId'] = (int)($variation['page-id']);
+                $variation['pageId'] = filter_var($variation['page-id'], FILTER_VALIDATE_INT);
                 $db->CreateTestVariation($id, $variation);
             }
         }
@@ -58,7 +59,7 @@ class ConvertProStore
             wp_redirect(admin_url('admin.php?page=convert-pro-settings&message=error_delete'));
         }
 
-        $id = $_GET['id'];
+        $id = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : '';
 
         $db = new ConvertProrepo();
         $db->TestDelete($id);
@@ -91,7 +92,7 @@ class ConvertProStore
 
         $db = new Storedatabase();
 
-        $db->updateTest($_POST['test-id']);
+        $db->updateTest(filter_var($_POST['test-id'], FILTER_VALIDATE_INT));
         if (isset($_POST['test-variation']) && is_array($_POST['test-variation'])) {
             foreach ($_POST['test-variation'] as $variation) {
 

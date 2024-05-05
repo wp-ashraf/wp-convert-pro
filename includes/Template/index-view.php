@@ -1,3 +1,6 @@
+<?php
+if (!defined('ABSPATH')) exit;
+?>
 <div class="wrap convert-pro-test-index">
     <div class="messages">
         <?php

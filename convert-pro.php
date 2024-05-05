@@ -277,7 +277,7 @@ $convertpro = ConvertPro::init();
 
 
 // Function to randomly redirect users between two pages based on identifier
-function random_redirect()
+function convertpro_random_redirect()
 {
 
     // Check if the identifier exists in the URL query string
@@ -327,7 +327,7 @@ function random_redirect()
     }
 }
 // Hook the function to a WordPress action or filter
-add_action('template_redirect', 'random_redirect');
+add_action('template_redirect', 'convertpro_random_redirect');
 
 
 function selectVariation($wpdb, $test_id)

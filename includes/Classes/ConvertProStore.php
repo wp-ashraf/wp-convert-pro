@@ -34,7 +34,8 @@ class ConvertProStore
         $id = $db->CreateTest();
         $id = filter_var($id, FILTER_VALIDATE_INT);
         if (isset($_POST['test-variation']) && is_array($_POST['test-variation'])) {
-            foreach ($_POST['test-variation'] as $variation) {
+            $test_variations = $_POST['test-variation'];
+            foreach ($test_variations as $variation) {
                 $variation['pageId'] = filter_var($variation['page-id'], FILTER_VALIDATE_INT);
                 $db->CreateTestVariation($id, $variation);
             }
@@ -94,7 +95,8 @@ class ConvertProStore
 
         $db->updateTest(filter_var($_POST['test-id'], FILTER_VALIDATE_INT));
         if (isset($_POST['test-variation']) && is_array($_POST['test-variation'])) {
-            foreach ($_POST['test-variation'] as $variation) {
+            $test_variations = sanitize_text_field($_POST['test-variation']);
+            foreach ($test_variations as $variation) {
 
                 $variation['postId'] = (int) $variation['page-id'];
 
@@ -104,6 +106,6 @@ class ConvertProStore
             }
         }
 
-        wp_redirect(admin_url('admin.php?page=convert-pro-settings&scope=test&action=edit&id=' . $_POST['test-id'] . '&message=save_success'));
+        wp_redirect(admin_url('admin.php?page=convert-pro-settings&scope=test&action=edit&id=' . sanitize_text_field( $_POST['test-id']) . '&message=save_success'));
     }
 }

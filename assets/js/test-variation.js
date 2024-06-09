@@ -11,12 +11,21 @@ jQuery(document).ready(function () {
 	});
     // Define your query variables and values
     registerFormSubmit();
+     delete_button_alert();
 });
 
 /**
  * show alert when delete btn click
  */
-
+  function delete_button_alert() {
+            jQuery(".delete-button").click(function(e) {
+                e.preventDefault();
+                if (confirm("Are you sure you want to delete it?")) {
+                    console.log("Delete confirmed");
+                    jQuery(this).closest('form').submit();
+                }
+            });
+        }
 
 function testconversiontype() {
     let conversionType = jQuery('select[name="test-conversion-type"]');

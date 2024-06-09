@@ -63,21 +63,7 @@ if (!defined('ABSPATH')) exit;
         ?>
 
     </div>
-    <script>
-        jQuery(document).ready(function($) {
-            delete_button_alert();
-        });
 
-        function delete_button_alert() {
-            jQuery(".delete-button").click(function(e) {
-                e.preventDefault();
-                if (confirm("Are you sure you want to delete it?")) {
-                    console.log("Delete confirmed");
-                    jQuery(this).closest('form').submit();
-                }
-            });
-        }
-    </script>
     <div class="content-wrapper">
         <div class="padding-wrapper">
             <div class="convertpro-title-btn">

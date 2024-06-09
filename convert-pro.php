@@ -281,8 +281,12 @@ if (!function_exists('convertpro_random_redirect')) {
 
     function convertpro_random_redirect()
     {
-
-        $current_slug = sanitize_text_field(trim(wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
+        $url_path = wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        if ($url_path === false || $url_path === null) {
+            $url_path = '';
+        }
+        $trimmed_path = trim($url_path, '/');
+        $current_slug = sanitize_text_field($trimmed_path);
         // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         global $wpdb;
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -297,7 +301,7 @@ if (!function_exists('convertpro_random_redirect')) {
 
                 if (isset($_COOKIE['convert_pro_test_' . $value->id]) && in_array($_COOKIE['convert_pro_test_' . $value->id], $page_slugs)) {
                     // Redirect if the cookie is set and its value matches a page slug
-                    wp_redirect(esc_url(home_url('/')) . $_COOKIE['convert_pro_test_' . $value->id]);
+                    wp_redirect(esc_url(home_url('/')) . sanitize_text_field($_COOKIE['convert_pro_test_' . $value->id]));
                     exit;
                 } else {
                     $variation1 = convertpro_query($value->id)[0];
@@ -389,7 +393,7 @@ if (!function_exists('convertpro_updateVariationAndRedirect')) {
         setcookie('convert_pro_uid', $cookie_value, time() + 3600, "/");
         $_COOKIE['convert_pro_uid'] = $cookie_value;
         // store cookie value
-        convertpro_store_visit_data($_COOKIE['convert_pro_uid'], $variation->id, $testid);
+        convertpro_store_visit_data(sanitize_text_field($_COOKIE['convert_pro_uid']), $variation->id, $testid);
 
         wp_redirect(get_permalink($variation->page_id));
         exit();

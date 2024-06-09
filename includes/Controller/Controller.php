@@ -10,7 +10,7 @@ class Controller
     {
         // write a code here
         // phpcs:ignore
-        $action = isset($_GET['action']) ? $_GET['action'] : "index";
+        $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : "index";
 
         switch ($action) {
             case "index":

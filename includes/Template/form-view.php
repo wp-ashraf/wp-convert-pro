@@ -35,50 +35,6 @@ if ($scope == "edit") {
 
 </div>
 
-<script>
-    var homeUrl = '<?php echo esc_url(home_url('/')); ?>';
-
-    function onTestUriChanged(value) {
-        var url = homeUrl + value;
-        jQuery("#test-page-url").attr("href", url);
-    }
-
-    var ajaxurl = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
-
-    jQuery(document).ready(function() {
-        jQuery('select[name="test-conversion-page"]').change(function() {
-            // Get the selected option value (which is the page ID)
-            var pageid = jQuery(this).val();
-            jQuery.ajax({
-                url: ajaxurl, // WordPress AJAX URL
-                type: 'POST',
-                data: {
-                    action: 'get_permalink_by_id',
-                    page_id: pageid
-                },
-                success: function(permalink) {
-                    // Handle the retrieved permalink
-                    console.log('Permalink:', permalink);
-
-                    // Redirect to the permalink with the query string parameter
-                    // window.location.href = permalinkWithQuery;
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                }
-            });
-        });
-
-
-        // Get the current URL
-
-    });
-
-
-
-    // coversion page id find
-</script>
-
 <div class="create-content-wrapper">
     <div class="test-top-area">
         <div class="back-test">

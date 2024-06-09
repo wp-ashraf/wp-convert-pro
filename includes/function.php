@@ -15,7 +15,7 @@ if (!function_exists('convertpro_ajax_request')) {
         $testId = isset($_COOKIE['convert_pro_test_id']) ? sanitize_text_field($_COOKIE['convert_pro_test_id']) : '';
         $variationid = isset($_COOKIE['convert_pro_variation_id']) ? sanitize_text_field($_COOKIE['convert_pro_test_id']) : '';
         $clientId = isset($_COOKIE['convert_pro_uid']) ? sanitize_text_field($_COOKIE['convert_pro_uid']) : '';
-        $pageslug = $_COOKIE['convert_pro_test_' . $testId];
+        $pageslug = isset($_COOKIE['convert_pro_test_' . $testId]) ? sanitize_term_field($_COOKIE['convert_pro_test_' . $testId]) : '';
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
         $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM " . $wpdb->prefix . "convertpro" . " WHERE id =%d", $testId));
         // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
@@ -25,7 +25,7 @@ if (!function_exists('convertpro_ajax_request')) {
 
         $permalink = get_permalink($pageId);
 
-        $purl = isset($_POST['previous_url']) ? esc_url($_POST['previous_url']) : '';
+        $purl = isset($_POST['previous_url']) ? sanitize_url($_POST['previous_url']) : '';
 
         $parsedUrl = wp_parse_url($purl);
         $path = isset($parsedUrl['path']) ? $parsedUrl['path'] : '';

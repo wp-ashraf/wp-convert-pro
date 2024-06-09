@@ -1,12 +1,12 @@
 {
-    "name": "tareq1988/vue-wp-starter",
-    "description": "A WordPress Vue.js starter plugin",
+    "name": "wpgrids/convertpro",
+    "description": "ConvertPro allows you to ab testing.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Tareq Hasan",
-            "email": "tareq@wedevs.com"
+            "name": "wpgrids",
+            "email": "wpgrids@gmail.com"
         }
     ],
     "minimum-stability": "dev",
@@ -15,6 +15,6 @@
         "psr-4": {
             "ConvertPro\\": "includes/"
         },
-        "files": ["includes/function.php"]
+        "files": ["includes/function.php","includes/hook.php"]
     }
 }

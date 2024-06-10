@@ -281,12 +281,12 @@ if (!function_exists('convertpro_random_redirect')) {
 
     function convertpro_random_redirect()
     {
-        $url_path = wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $url_path = wp_parse_url(sanitize_url( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH);
         if ($url_path === false || $url_path === null) {
             $url_path = '';
         }
         $trimmed_path = trim($url_path, '/');
-        $current_slug = sanitize_text_field($trimmed_path);
+        $current_slug = $trimmed_path;
         // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
         global $wpdb;
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -391,7 +391,7 @@ if (!function_exists('convertpro_updateVariationAndRedirect')) {
         setcookie('convert_pro_test_id', $testid, time() + (86400 * 30), '/');
         setcookie('convert_pro_variation_id', $variation->id, time() + (86400 * 30), '/');
         setcookie('convert_pro_uid', $cookie_value, time() + 3600, "/");
-        $_COOKIE['convert_pro_uid'] = $cookie_value;
+        $_COOKIE['convert_pro_uid'] = esc_hrml($cookie_value);
         // store cookie value
         convertpro_store_visit_data(sanitize_text_field($_COOKIE['convert_pro_uid']), $variation->id, $testid);
 

@@ -2,19 +2,17 @@
     "name": "wpgrids/convertpro",
     "description": "ConvertPro allows you to ab testing.",
     "type": "wordpress-plugin",
-    "license": "GPL-2.0-or-later",
-    "authors": [
-        {
-            "name": "wpgrids",
-            "email": "wpgrids@gmail.com"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {},
+    "license": "GPL-2.0+",
     "autoload": {
         "psr-4": {
             "ConvertPro\\": "includes/"
-        },
-        "files": ["includes/function.php","includes/hook.php"]
-    }
+        }
+    },
+    "authors": [
+        {
+            "name": "WPGrids"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
 }

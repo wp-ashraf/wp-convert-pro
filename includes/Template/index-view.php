@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) exit;
             // phpcs:ignore
             if (in_array($_GET['message'], $allowed_messages, true)) {
                 // phpcs:ignore
-                switch ($_GET['message']) {
+                switch (sanitize_text_field( $_GET['message'] )) {
                     case "security_error":
                         $message = esc_html__('Security Error', 'convert-pro');
                         break;
@@ -46,7 +46,7 @@ if (!defined('ABSPATH')) exit;
         ?>
                     <div class="notice notice-<?php
                                                 // phpcs:ignore
-                                                echo ($_GET['message'] === 'delete_success') ? 'success' : 'warning'; ?> is-dismissible">
+                                                echo (sanitize_text_field( $_GET['message'] ) === 'delete_success') ? 'success' : 'warning'; ?> is-dismissible">
                         <p><?php echo esc_html($message); ?></p>
                     </div>
                 <?php

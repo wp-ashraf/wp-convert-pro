@@ -12,7 +12,7 @@ class ConvertProStore
      */
     public function ConvertProrepoStore()
     {
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'convert-pro-nonce') || !is_user_logged_in()) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(wp_unslash(sanitize_text_field($_POST['nonce'])), 'convert-pro-nonce') || !is_user_logged_in()) {
             wp_redirect(admin_url('admin.php?page=convert-pro-settings&message=security_error'));
             exit;
         }
@@ -52,7 +52,7 @@ class ConvertProStore
     public function ConvertProrepoDelete()
     {
         // write a code here
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'convert-pro-nonce') || !is_user_logged_in()) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(wp_unslash(sanitize_text_field($_POST['nonce'])), 'convert-pro-nonce') || !is_user_logged_in()) {
             wp_redirect(admin_url('admin.php?page=convert-pro-settings&message=security_error'));
             exit;
         }
@@ -76,7 +76,7 @@ class ConvertProStore
     public function ConvertProrepoupdate()
     {
         // write a code here
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'convert-pro-nonce') || !is_user_logged_in()) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(wp_unslash(sanitize_text_field($_POST['nonce'])), 'convert-pro-nonce') || !is_user_logged_in()) {
             wp_redirect(admin_url('admin.php?page=convert-pro-settings&message=security_error'));
             return;
         }
